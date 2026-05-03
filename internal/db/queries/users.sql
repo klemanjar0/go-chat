@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users (email, password_hash, first_name, last_name)
-VALUES ($1, $2, $3, $4)
+INSERT INTO users (username, password_hash, first_name, last_name, avatar_url, phone)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetUserByID :one
@@ -8,24 +8,22 @@ SELECT *
 FROM users
 WHERE id = $1;
 
--- name: GetUserByEmail :one
+-- name: GetUserByUsername :one
 SELECT *
 FROM users
-WHERE email = $1;
+WHERE username = $1;
 
--- name: EmailExists :one
-SELECT EXISTS(SELECT 1 FROM users WHERE email = $1) AS exists;
+-- name: UsernameExists :one
+SELECT EXISTS(SELECT 1 FROM users WHERE username = $1) AS exists;
 
--- name: UpdateUserPassword :one
+-- name: UpdateUser :one
 UPDATE users
-SET password_hash = $2
-WHERE id = $1
-RETURNING *;
-
--- name: UpdateUserProfile :one
-UPDATE users
-SET first_name = $2,
-    last_name  = $3
+SET username      = $2,
+    password_hash = $3,
+    first_name    = $4,
+    last_name     = $5,
+    avatar_url    = $6,
+    phone         = $7
 WHERE id = $1
 RETURNING *;
 

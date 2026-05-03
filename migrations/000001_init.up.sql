@@ -3,10 +3,12 @@ CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE TABLE users (
     id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    email         CITEXT      NOT NULL UNIQUE,
+    username      CITEXT      NOT NULL UNIQUE,
     password_hash TEXT        NOT NULL,
     first_name    TEXT        NOT NULL DEFAULT '',
     last_name     TEXT        NOT NULL DEFAULT '',
+    avatar_url    TEXT        NOT NULL DEFAULT '',
+    phone         TEXT        NOT NULL DEFAULT '',
     created_date  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_date  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

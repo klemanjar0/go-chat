@@ -24,10 +24,12 @@ type RefreshToken struct {
 
 type User struct {
 	ID           pgtype.UUID        `json:"id"`
-	Email        string             `json:"email"`
+	Username     string             `json:"username"`
 	PasswordHash string             `json:"password_hash"`
 	FirstName    string             `json:"first_name"`
 	LastName     string             `json:"last_name"`
+	AvatarUrl    string             `json:"avatar_url"`
+	Phone        string             `json:"phone"`
 	CreatedDate  pgtype.Timestamptz `json:"created_date"`
 	UpdatedDate  pgtype.Timestamptz `json:"updated_date"`
 }

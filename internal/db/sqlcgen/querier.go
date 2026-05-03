@@ -15,16 +15,15 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteExpiredRefreshTokens(ctx context.Context) (int64, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
-	EmailExists(ctx context.Context, email string) (bool, error)
 	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (RefreshToken, error)
 	GetRefreshTokenByID(ctx context.Context, id pgtype.UUID) (RefreshToken, error)
-	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
+	GetUserByUsername(ctx context.Context, username string) (User, error)
 	RevokeAllUserRefreshTokens(ctx context.Context, userID pgtype.UUID) (int64, error)
 	RevokeRefreshToken(ctx context.Context, id pgtype.UUID) (RefreshToken, error)
 	RotateRefreshToken(ctx context.Context, arg RotateRefreshTokenParams) (RefreshToken, error)
-	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
-	UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (User, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UsernameExists(ctx context.Context, username string) (bool, error)
 }
 
 var _ Querier = (*Queries)(nil)
