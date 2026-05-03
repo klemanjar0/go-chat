@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"context"
-	"go-chat/internal/app"
 	"go-chat/internal/configuration"
+	"go-chat/pkg/fiberutil"
 	"go-chat/pkg/logger"
-	"net/http"
 
 	pkgpostgres "go-chat/pkg/postgres"
 	pkgredis "go-chat/pkg/redis"
@@ -29,6 +28,6 @@ func main() {
 		logger.Fatal("failed to connect to redis", "err", err)
 	}
 
-	app := app.New(pgPool, redis)
+	fiberApp := fiberutil.NewApp()
 
 }

@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: go-chat-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-chat-db-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chat-db-admin-password}
+      POSTGRES_DB: ${DB_NAME:-chat-db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-chat-db-admin} -d ${DB_NAME:-chat-db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: go-chat-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    image: migrate/migrate:v4.18.1
+    container_name: go-chat-migrate
+    profiles: ["tools"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    entrypoint:
+      [
+        "migrate",
+        "-path", "/migrations",
+        "-database", "postgres://${DB_USER:-chat-db-admin}:${DB_PASSWORD:-chat-db-admin-password}@postgres:5432/${DB_NAME:-chat-db}?sslmode=disable",
+      ]
+    command: ["up"]
+
+volumes:
+  pgdata:
+  redisdata:

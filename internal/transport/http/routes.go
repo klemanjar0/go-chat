@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func RegisterRoutes(app *fiber.App, h *UserHTTPHandler, authMiddleware fiber.Handler) {
+func RegisterRoutes(app *fiber.App, userHandler UserHandler, authMiddleware fiber.Handler) {
 	api := app.Group("/api")
 
 	api.Get("/health", func(c fiber.Ctx) error {
