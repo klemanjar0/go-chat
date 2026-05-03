@@ -18,12 +18,12 @@ RETURNING id, username, password_hash, first_name, last_name, avatar_url, phone,
 `
 
 type CreateUserParams struct {
-	Username     string `json:"username"`
-	PasswordHash string `json:"password_hash"`
-	FirstName    string `json:"first_name"`
-	LastName     string `json:"last_name"`
-	AvatarUrl    string `json:"avatar_url"`
-	Phone        string `json:"phone"`
+	Username     string  `json:"username"`
+	PasswordHash string  `json:"password_hash"`
+	FirstName    string  `json:"first_name"`
+	LastName     string  `json:"last_name"`
+	AvatarUrl    *string `json:"avatar_url"`
+	Phone        string  `json:"phone"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -124,7 +124,7 @@ type UpdateUserParams struct {
 	PasswordHash string      `json:"password_hash"`
 	FirstName    string      `json:"first_name"`
 	LastName     string      `json:"last_name"`
-	AvatarUrl    string      `json:"avatar_url"`
+	AvatarUrl    *string     `json:"avatar_url"`
 	Phone        string      `json:"phone"`
 }
 

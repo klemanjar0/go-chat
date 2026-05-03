@@ -28,7 +28,7 @@ type User struct {
 	PasswordHash string             `json:"password_hash"`
 	FirstName    string             `json:"first_name"`
 	LastName     string             `json:"last_name"`
-	AvatarUrl    string             `json:"avatar_url"`
+	AvatarUrl    *string            `json:"avatar_url"`
 	Phone        string             `json:"phone"`
 	CreatedDate  pgtype.Timestamptz `json:"created_date"`
 	UpdatedDate  pgtype.Timestamptz `json:"updated_date"`
