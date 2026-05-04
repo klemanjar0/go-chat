@@ -1,29 +1,12 @@
 package http
 
-type RegisterUserPayload struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type RegisterUserResponse struct {
-	UserID       string `json:"user_id"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-type LoginUserPayload struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginUserResponse struct {
-	UserID       string `json:"user_id"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
+import "github.com/gofiber/fiber/v3"
 
 type UserHandler interface {
-	Register(payload RegisterUserPayload) (RegisterUserResponse, error)
-	Login(payload LoginUserPayload) (LoginUserResponse, error)
-	Logout() error
+	Register(c fiber.Ctx) error
+	Login(c fiber.Ctx) error
+	Refresh(c fiber.Ctx) error
+	Logout(c fiber.Ctx) error
+	LogoutAll(c fiber.Ctx) error
+	Me(c fiber.Ctx) error
 }

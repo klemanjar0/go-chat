@@ -2,6 +2,8 @@ package configuration
 
 import (
 	"fmt"
+	"time"
+
 	"go-chat/pkg/config"
 	"go-chat/pkg/postgres"
 	"go-chat/pkg/redis"
@@ -15,10 +17,19 @@ const (
 	EnvDev   Environment = "DEVELOPMENT"
 )
 
+type AuthConfig struct {
+	JWTSecret       string
+	JWTIssuer       string
+	AccessTokenTTL  time.Duration
+	RefreshTokenTTL time.Duration
+	BcryptCost      int
+}
+
 type GlobalConfig struct {
 	Env      Environment
 	PgCfg    *postgres.Config
 	RedisCfg *redis.Config
+	AuthCfg  *AuthConfig
 	HttpPort string
 }
 
@@ -64,10 +75,28 @@ func Load() *GlobalConfig {
 		DB:       config.GetEnvInt("REDIS_DB", 0),
 	}
 
+	// -- auth config --
+
+	authCfg := &AuthConfig{
+		JWTSecret:       config.GetEnv("JWT_SECRET", ""),
+		JWTIssuer:       config.GetEnv("JWT_ISSUER", "go-chat"),
+		AccessTokenTTL:  time.Duration(config.GetEnvInt("ACCESS_TOKEN_TTL_SECONDS", 900)) * time.Second,
+		RefreshTokenTTL: time.Duration(config.GetEnvInt("REFRESH_TOKEN_TTL_SECONDS", 60*60*24*30)) * time.Second,
+		BcryptCost:      config.GetEnvInt("BCRYPT_COST", 12),
+	}
+
+	if env == EnvProd && authCfg.JWTSecret == "" {
+		panic("JWT_SECRET must be set in production")
+	}
+	if authCfg.JWTSecret == "" {
+		authCfg.JWTSecret = "dev-insecure-secret-change-me"
+	}
+
 	return &GlobalConfig{
 		Env:      env,
 		PgCfg:    pgCfg,
 		RedisCfg: redisCfg,
+		AuthCfg:  authCfg,
 		HttpPort: config.GetEnv("HTTP_PORT", "8080"),
 	}
 }
