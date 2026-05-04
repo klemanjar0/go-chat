@@ -1,6 +1,11 @@
-package user
+package auth
 
-import "time"
+import (
+	"time"
+
+	"go-chat/internal/domain/user"
+	authuc "go-chat/internal/usecase/auth"
+)
 
 type RegisterRequest struct {
 	Username  string  `json:"username"`
@@ -47,19 +52,19 @@ type AuthResponse struct {
 	Tokens TokenResponse `json:"tokens"`
 }
 
-func ToUserResponse(u *User) UserResponse {
+func toUserResponse(u *user.User) UserResponse {
 	return UserResponse{
 		ID:        u.ID,
 		Username:  u.Username,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
-		AvatarURL: u.AvatarUrl,
+		AvatarURL: u.AvatarURL,
 		Phone:     u.Phone,
-		CreatedAt: u.CreatedDate,
+		CreatedAt: u.CreatedAt,
 	}
 }
 
-func ToTokenResponse(p TokenPair) TokenResponse {
+func toTokenResponse(p authuc.TokenPair) TokenResponse {
 	return TokenResponse{
 		AccessToken:      p.AccessToken,
 		AccessExpiresAt:  p.AccessExpiresAt,
@@ -69,9 +74,9 @@ func ToTokenResponse(p TokenPair) TokenResponse {
 	}
 }
 
-func ToAuthResponse(r *AuthResult) AuthResponse {
+func toAuthResponse(r *authuc.AuthResult) AuthResponse {
 	return AuthResponse{
-		User:   ToUserResponse(r.User),
-		Tokens: ToTokenResponse(r.Tokens),
+		User:   toUserResponse(r.User),
+		Tokens: toTokenResponse(r.Tokens),
 	}
 }

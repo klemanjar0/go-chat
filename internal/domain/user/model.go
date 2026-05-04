@@ -1,9 +1,10 @@
 package user
 
 import (
+	"time"
+
 	"go-chat/internal/db/sqlcgen"
 	"go-chat/pkg/utilid"
-	"time"
 )
 
 type User struct {
@@ -12,38 +13,47 @@ type User struct {
 	PasswordHash string
 	FirstName    string
 	LastName     string
-	AvatarUrl    *string
+	AvatarURL    *string
 	Phone        string
-	CreatedDate  time.Time
-	UpdatedDate  time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
-func FromPg(pgUser *sqlcgen.User) *User {
+type CreateInput struct {
+	Username     string
+	PasswordHash string
+	FirstName    string
+	LastName     string
+	AvatarURL    *string
+	Phone        string
+}
+
+func fromPg(row *sqlcgen.User) *User {
 	return &User{
-		ID:           utilid.FromPg(pgUser.ID).AsString(),
-		Username:     pgUser.Username,
-		PasswordHash: pgUser.PasswordHash,
-		FirstName:    pgUser.FirstName,
-		LastName:     pgUser.LastName,
-		AvatarUrl:    pgUser.AvatarUrl,
-		Phone:        pgUser.Phone,
-		CreatedDate:  pgUser.CreatedDate.Time,
-		UpdatedDate:  pgUser.UpdatedDate.Time,
+		ID:           utilid.FromPg(row.ID).AsString(),
+		Username:     row.Username,
+		PasswordHash: row.PasswordHash,
+		FirstName:    row.FirstName,
+		LastName:     row.LastName,
+		AvatarURL:    row.AvatarUrl,
+		Phone:        row.Phone,
+		CreatedAt:    row.CreatedDate.Time,
+		UpdatedAt:    row.UpdatedDate.Time,
 	}
 }
 
-func (user *User) UpdatePassword(newPasswordHash string) {
-	user.PasswordHash = newPasswordHash
-	user.UpdatedDate = time.Now()
+func (u *User) UpdatePassword(hash string) {
+	u.PasswordHash = hash
+	u.UpdatedAt = time.Now()
 }
 
-func (user *User) UpdateProfileData(firstName, lastName string) {
-	user.FirstName = firstName
-	user.LastName = lastName
-	user.UpdatedDate = time.Now()
+func (u *User) UpdateProfile(firstName, lastName string) {
+	u.FirstName = firstName
+	u.LastName = lastName
+	u.UpdatedAt = time.Now()
 }
 
-func (user *User) SetAvatar(url *string) {
-	user.AvatarUrl = url
-	user.UpdatedDate = time.Now()
+func (u *User) SetAvatar(url *string) {
+	u.AvatarURL = url
+	u.UpdatedAt = time.Now()
 }

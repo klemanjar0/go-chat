@@ -5,7 +5,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var log *zap.SugaredLogger
+// log defaults to a Nop logger so packages can use the global safely without
+// requiring callers (and tests) to call Init first. Init replaces it.
+var log = zap.NewNop().Sugar()
 
 func Init(service string, isDev bool) {
 	var config zap.Config
