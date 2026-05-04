@@ -56,7 +56,7 @@ func Run() error {
 	jwt := pkgauth.NewJWTIssuer(cfg.Auth.JWTSecret, cfg.Auth.JWTIssuer, cfg.Auth.AccessTTL)
 
 	authUC := authuc.NewUseCase(cfg.Auth, userRepo, refreshRepo, accessStore, jwt, pkgauth.Service{}, clock.System{})
-	userUC := useruc.NewUseCase(userRepo)
+	userUC := useruc.NewUseCase(userRepo, pkgauth.Service{}, cfg.Auth.BcryptCost)
 
 	registerErrorMappings()
 

@@ -70,3 +70,27 @@ func (r *Repository) GetByUsername(ctx context.Context, username string) (*User,
 func (r *Repository) UsernameExists(ctx context.Context, username string) (bool, error) {
 	return r.queries.UsernameExists(ctx, username)
 }
+
+func (r *Repository) Update(ctx context.Context, u *User) (*User, error) {
+	pg := u.ToPg()
+	row, err := r.queries.UpdateUser(ctx, sqlcgen.UpdateUserParams{
+		ID:           pg.ID,
+		Username:     pg.Username,
+		PasswordHash: pg.PasswordHash,
+		FirstName:    pg.FirstName,
+		LastName:     pg.LastName,
+		AvatarUrl:    pg.AvatarUrl,
+		Phone:        pg.Phone,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeUniqueViolation {
+			return nil, ErrUsernameTaken
+		}
+		return nil, err
+	}
+	return fromPg(&row), nil
+}

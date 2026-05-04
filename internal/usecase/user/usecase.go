@@ -12,12 +12,22 @@ import (
 // Store is the slice of user.Repository the user flows need.
 type Store interface {
 	GetByID(ctx context.Context, id string) (*user.User, error)
+	Update(ctx context.Context, u *user.User) (*user.User, error)
+}
+
+// CryptoService is the slice of password primitives the user flows need.
+// Production impl is pkg/auth.Service.
+type CryptoService interface {
+	HashPassword(password string, cost int) (string, error)
+	VerifyPassword(hash, password string) error
 }
 
 type UseCase struct {
-	users Store
+	users      Store
+	crypto     CryptoService
+	bcryptCost int
 }
 
-func NewUseCase(users Store) *UseCase {
-	return &UseCase{users: users}
+func NewUseCase(users Store, crypto CryptoService, bcryptCost int) *UseCase {
+	return &UseCase{users: users, crypto: crypto, bcryptCost: bcryptCost}
 }

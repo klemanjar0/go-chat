@@ -33,4 +33,7 @@ func RegisterRoutes(app *fiber.App, h Handlers, authMW fiber.Handler) {
 	// protected users
 	users := api.Group("/users", authMW)
 	users.Get("/me", h.User.Me)
+	users.Put("/me/password", h.User.UpdatePassword)
+	users.Put("/me/profile", h.User.UpdateProfile)
+	users.Put("/me/avatar", h.User.SetAvatar)
 }

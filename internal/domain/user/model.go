@@ -5,6 +5,8 @@ import (
 
 	"go-chat/internal/db/sqlcgen"
 	"go-chat/pkg/utilid"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type User struct {
@@ -39,6 +41,20 @@ func fromPg(row *sqlcgen.User) *User {
 		Phone:        row.Phone,
 		CreatedAt:    row.CreatedDate.Time,
 		UpdatedAt:    row.UpdatedDate.Time,
+	}
+}
+
+func (u *User) ToPg() *sqlcgen.User {
+	return &sqlcgen.User{
+		ID:           utilid.FromString(u.ID).AsPgUUID(),
+		Username:     u.Username,
+		FirstName:    u.FirstName,
+		LastName:     u.LastName,
+		PasswordHash: u.PasswordHash,
+		Phone:        u.Phone,
+		AvatarUrl:    u.AvatarURL,
+		CreatedDate:  pgtype.Timestamptz{Valid: true, Time: u.CreatedAt},
+		UpdatedDate:  pgtype.Timestamptz{Valid: true, Time: u.UpdatedAt},
 	}
 }
 

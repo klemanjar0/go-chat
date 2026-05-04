@@ -6,6 +6,20 @@ import (
 	"go-chat/internal/domain/user"
 )
 
+type UpdatePasswordRequest struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+}
+
+type UpdateProfileRequest struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+type SetAvatarRequest struct {
+	AvatarURL *string `json:"avatar_url"`
+}
+
 type Response struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
