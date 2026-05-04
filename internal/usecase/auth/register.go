@@ -2,14 +2,10 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	domainauth "go-chat/internal/domain/auth"
 	"go-chat/internal/domain/user"
-	pkgauth "go-chat/pkg/auth"
-
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type RegisterInput struct {
@@ -27,7 +23,7 @@ func (uc *UseCase) Register(ctx context.Context, in RegisterInput, meta SessionM
 		return nil, domainauth.ErrInvalidPayload
 	}
 
-	hash, err := pkgauth.HashPassword(in.Password, uc.cfg.BcryptCost)
+	hash, err := uc.crypto.HashPassword(in.Password, uc.cfg.BcryptCost)
 	if err != nil {
 		return nil, err
 	}
@@ -41,10 +37,6 @@ func (uc *UseCase) Register(ctx context.Context, in RegisterInput, meta SessionM
 		AvatarURL:    in.AvatarURL,
 	})
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return nil, user.ErrUsernameTaken
-		}
 		return nil, err
 	}
 

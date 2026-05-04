@@ -8,8 +8,11 @@ import (
 	"go-chat/pkg/utilid"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+const pgErrCodeUniqueViolation = "23505"
 
 type Repository struct {
 	queries *sqlcgen.Queries
@@ -29,6 +32,10 @@ func (r *Repository) Create(ctx context.Context, in CreateInput) (*User, error) 
 		Phone:        in.Phone,
 	})
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgErrCodeUniqueViolation {
+			return nil, ErrUsernameTaken
+		}
 		return nil, err
 	}
 	return fromPg(&row), nil

@@ -44,6 +44,21 @@ type JWTService interface {
 	Verify(token string) (*pkgauth.AccessClaims, error)
 }
 
+// CryptoService is the slice of password / refresh-token primitives the auth
+// use case depends on. Production impl is pkg/auth.Service.
+type CryptoService interface {
+	HashPassword(password string, cost int) (string, error)
+	VerifyPassword(hash, password string) error
+	GenerateRefreshToken() (string, error)
+	HashRefreshToken(token string) string
+}
+
+// Clock returns the current time. Injected so flows that compute expiries or
+// compare timestamps can be tested with a fixed instant.
+type Clock interface {
+	Now() time.Time
+}
+
 type SessionMeta struct {
 	UserAgent *string
 	IP        *netip.Addr
@@ -67,6 +82,8 @@ type UseCase struct {
 	refresh RefreshTokenStore
 	access  AccessTokenStore
 	jwt     JWTService
+	crypto  CryptoService
+	clock   Clock
 }
 
 func NewUseCase(
@@ -75,6 +92,8 @@ func NewUseCase(
 	refresh RefreshTokenStore,
 	access AccessTokenStore,
 	jwt JWTService,
+	crypto CryptoService,
+	clock Clock,
 ) *UseCase {
 	return &UseCase{
 		cfg:     cfg,
@@ -82,26 +101,28 @@ func NewUseCase(
 		refresh: refresh,
 		access:  access,
 		jwt:     jwt,
+		crypto:  crypto,
+		clock:   clock,
 	}
 }
 
 // issueTokenPair signs a fresh access token and persists a new refresh token.
-// Used by Register, Login.
+// Used by Register and Login.
 func (uc *UseCase) issueTokenPair(ctx context.Context, userID string, meta SessionMeta) (*TokenPair, error) {
 	access, err := uc.jwt.Issue(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	rawRefresh, err := pkgauth.GenerateRefreshToken()
+	rawRefresh, err := uc.crypto.GenerateRefreshToken()
 	if err != nil {
 		return nil, err
 	}
 
-	expiresAt := time.Now().Add(uc.cfg.RefreshTTL)
+	expiresAt := uc.clock.Now().Add(uc.cfg.RefreshTTL)
 	if _, err := uc.refresh.Create(ctx, domainauth.CreateRefreshTokenInput{
 		UserID:    userID,
-		TokenHash: pkgauth.HashRefreshToken(rawRefresh),
+		TokenHash: uc.crypto.HashRefreshToken(rawRefresh),
 		ExpiresAt: expiresAt,
 		UserAgent: meta.UserAgent,
 		IP:        meta.IP,

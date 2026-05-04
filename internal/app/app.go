@@ -22,6 +22,7 @@ import (
 	authuc "go-chat/internal/usecase/auth"
 	useruc "go-chat/internal/usecase/user"
 	pkgauth "go-chat/pkg/auth"
+	"go-chat/pkg/clock"
 	"go-chat/pkg/fiberutil"
 	"go-chat/pkg/httputil"
 	"go-chat/pkg/logger"
@@ -54,7 +55,7 @@ func Run() error {
 	accessStore := domainauth.NewAccessTokenStore(rdb)
 	jwt := pkgauth.NewJWTIssuer(cfg.Auth.JWTSecret, cfg.Auth.JWTIssuer, cfg.Auth.AccessTTL)
 
-	authUC := authuc.NewUseCase(cfg.Auth, userRepo, refreshRepo, accessStore, jwt)
+	authUC := authuc.NewUseCase(cfg.Auth, userRepo, refreshRepo, accessStore, jwt, pkgauth.Service{}, clock.System{})
 	userUC := useruc.NewUseCase(userRepo)
 
 	registerErrorMappings()

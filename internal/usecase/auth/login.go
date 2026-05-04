@@ -7,7 +7,6 @@ import (
 
 	domainauth "go-chat/internal/domain/auth"
 	"go-chat/internal/domain/user"
-	pkgauth "go-chat/pkg/auth"
 )
 
 func (uc *UseCase) Login(ctx context.Context, username, password string, meta SessionMeta) (*AuthResult, error) {
@@ -24,7 +23,7 @@ func (uc *UseCase) Login(ctx context.Context, username, password string, meta Se
 		return nil, err
 	}
 
-	if err := pkgauth.VerifyPassword(u.PasswordHash, password); err != nil {
+	if err := uc.crypto.VerifyPassword(u.PasswordHash, password); err != nil {
 		return nil, domainauth.ErrInvalidCredentials
 	}
 

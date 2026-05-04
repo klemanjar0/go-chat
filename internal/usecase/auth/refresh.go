@@ -2,10 +2,8 @@ package auth
 
 import (
 	"context"
-	"time"
 
 	domainauth "go-chat/internal/domain/auth"
-	pkgauth "go-chat/pkg/auth"
 	"go-chat/pkg/logger"
 )
 
@@ -17,7 +15,9 @@ func (uc *UseCase) Refresh(ctx context.Context, refreshToken string, meta Sessio
 		return nil, domainauth.ErrInvalidToken
 	}
 
-	hash := pkgauth.HashRefreshToken(refreshToken)
+	now := uc.clock.Now()
+
+	hash := uc.crypto.HashRefreshToken(refreshToken)
 	stored, err := uc.refresh.GetByHash(ctx, hash)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (uc *UseCase) Refresh(ctx context.Context, refreshToken string, meta Sessio
 		return nil, domainauth.ErrTokenRevoked
 	}
 
-	if stored.IsExpired() {
+	if stored.IsExpired(now) {
 		return nil, domainauth.ErrTokenExpired
 	}
 
@@ -44,15 +44,15 @@ func (uc *UseCase) Refresh(ctx context.Context, refreshToken string, meta Sessio
 		return nil, err
 	}
 
-	newRaw, err := pkgauth.GenerateRefreshToken()
+	newRaw, err := uc.crypto.GenerateRefreshToken()
 	if err != nil {
 		return nil, err
 	}
 
-	expiresAt := time.Now().Add(uc.cfg.RefreshTTL)
+	expiresAt := now.Add(uc.cfg.RefreshTTL)
 	if _, err := uc.refresh.Rotate(ctx, stored.ID, domainauth.CreateRefreshTokenInput{
 		UserID:    stored.UserID,
-		TokenHash: pkgauth.HashRefreshToken(newRaw),
+		TokenHash: uc.crypto.HashRefreshToken(newRaw),
 		ExpiresAt: expiresAt,
 		UserAgent: meta.UserAgent,
 		IP:        meta.IP,

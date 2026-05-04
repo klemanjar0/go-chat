@@ -28,8 +28,8 @@ type CreateRefreshTokenInput struct {
 	IP        *netip.Addr
 }
 
-func (rt *RefreshToken) IsRevoked() bool { return rt.RevokedAt != nil }
-func (rt *RefreshToken) IsExpired() bool { return time.Now().After(rt.ExpiresAt) }
+func (rt *RefreshToken) IsRevoked() bool             { return rt.RevokedAt != nil }
+func (rt *RefreshToken) IsExpired(now time.Time) bool { return now.After(rt.ExpiresAt) }
 
 func refreshTokenFromPg(row *sqlcgen.RefreshToken) *RefreshToken {
 	rt := &RefreshToken{
